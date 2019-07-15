@@ -1,7 +1,8 @@
 import * as React from "react";
 import ShareTableRow from "./ShareTableRow";
-import WebApi, { WebApiResults } from "../Utilities/WebApi";
-import { PrincipalObjectAccess } from "../Utilities/Entities";
+import WebApi from "../Utilities/WebApi";
+import { PrincipalObjectAccess } from "../Typings/Entities";
+import { WebApiResults } from "../Typings/WebApi";
 
 interface ShareTableBodyState {
     poaRecords: PrincipalObjectAccess[];

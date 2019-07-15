@@ -1,25 +1,4 @@
-type Action = "POST" | "PATCH" | "PUT" | "GET" | "DELETE";
-export interface Header {
-    name: string;
-    value: string;
-}
-declare global {
-    interface Window {
-        GetGlobalContext: any;
-        Xrm: any;
-    }
-}
-
-export interface WebApiResults<Entity> {
-    "@Microsoft.Dynamics.CRM.totalrecordcount": number;
-    "@Microsoft.Dynamics.CRM.totalrecordcountlimitexceeded": boolean;
-    "@odata.context": string;
-    value: Entity[];
-}
-
-export interface EntityDefinition {
-    EntitySetName: string;
-}
+import { EntityDefinition, WebApiResults, Header, HttpAction } from "../Typings/WebApi";
 
 export default class WebApi {
     private static webAPIPath = "/api/data/v9.0";
@@ -79,7 +58,7 @@ export default class WebApi {
     }
 
     public static execute<T>(
-        action: Action,
+        action: HttpAction,
         query: string,
         data?: any,
         annotations?: boolean,
@@ -115,7 +94,7 @@ export default class WebApi {
     }
 
     public static executeSync(
-        action: Action,
+        action: HttpAction,
         query: string,
         data?: any,
         annotations?: boolean,
@@ -141,7 +120,7 @@ export default class WebApi {
     }
 
     public static buildRequest(
-        action: Action,
+        action: HttpAction,
         query: string,
         async: boolean,
         data?: any,
@@ -166,7 +145,7 @@ export default class WebApi {
         return request;
     }
 
-    public static validateRequestParams(action: Action, query: string, data?: any, addHeader?: Header) {
+    public static validateRequestParams(action: HttpAction, query: string, data?: any, addHeader?: Header) {
         if (!RegExp(action, "g").test("POST PATCH PUT GET DELETE")) {
             throw new Error(
                 "XrmUtilities.executeRequest: action parameter must be one of the following: " +

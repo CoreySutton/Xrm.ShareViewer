@@ -1,7 +1,7 @@
 import * as React from "react";
 import WebApi from "../Utilities/WebApi";
 import { Button, ButtonGroup } from "react-bootstrap";
-import { PrincipalObjectAccess, SystemUser, Team } from "../Utilities/Entities";
+import { PrincipalObjectAccess, SystemUser, Team } from "../Typings/Entities";
 
 interface ShareTableRowState {
     record: PrincipalObjectAccess;
