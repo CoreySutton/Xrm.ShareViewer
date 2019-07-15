@@ -1,27 +1,37 @@
 {
-    "name": "share-viewwer",
-    "version": "0.1.0",
-    "private": true,
+    "name": "share-viewer",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [],
+    "author": "Corey Sutton",
+    "license": "MIT",
+    "devDependencies": {
+        "@babel/core": "^7.5.4",
+        "@babel/plugin-proposal-class-properties": "^7.5.0",
+        "@babel/preset-env": "^7.5.4",
+        "@babel/preset-react": "^7.0.0",
+        "@types/react": "^16.8.23",
+        "babel-loader": "^8.0.6",
+        "css-loader": "^3.0.0",
+        "html-webpack-plugin": "^3.2.0",
+        "style-loader": "^0.23.1",
+        "ts-loader": "^6.0.4",
+        "typescript": "^3.5.3",
+        "webpack": "^4.35.3",
+        "webpack-cli": "^3.3.6",
+        "webpack-dev-server": "^3.7.2"
+    },
     "dependencies": {
+        "babel-polyfill": "^6.26.0",
         "bootstrap": "^4.3.1",
         "react": "^16.8.6",
-        "react-bootstrap": "^1.0.0-beta.8",
-        "react-dom": "^16.8.6",
-        "react-scripts": "2.1.8"
+        "react-bootstrap": "^1.0.0-beta.9",
+        "react-dom": "^16.8.6"
     },
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject"
-    },
-    "eslintConfig": {
-        "extends": "react-app"
-    },
-    "browserslist": [
-        ">0.2%",
-        "not dead",
-        "not ie <= 11",
-        "not op_mini all"
-    ]
+        "build-dev-watch": "webpack --progress --colors --display-error-details --watch --mode development",
+        "build-dev": "webpack --progress --colors --display-error-details --mode development",
+        "build": "webpack --progress --colors --display-error-details --mode production",
+        "start": "webpack-dev-server --mode development"
+    }
 }

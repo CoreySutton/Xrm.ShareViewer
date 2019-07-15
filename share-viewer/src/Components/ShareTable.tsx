@@ -1,9 +1,9 @@
-import React, { Component } from "react";
+import * as React from "react";
 import ShareTableBody from "./ShareTableBody";
-import Table from "react-bootstrap/Table";
+import { Table } from "react-bootstrap";
 import ShareActions from "./ShareActions";
 
-class ShareTable extends Component {
+class ShareTable extends React.Component {
     state = {
         refresh: false
     };
@@ -13,7 +13,7 @@ class ShareTable extends Component {
         return (
             <div>
                 <ShareActions onRefresh={this.onRefresh} />
-                <Table striped bordered hover>
+                <Table striped bordered hover size="sm">
                     <thead>
                         <tr>
                             <th>Type</th>
@@ -23,7 +23,7 @@ class ShareTable extends Component {
                         </tr>
                     </thead>
                     <ShareTableBody
-                        recordId="741EB865-115C-E911-A982-000D3A11EC14"
+                        recordId={parent.Xrm.Page.data.entity.getId()}
                         onRefresh={this.setOnRefreshCallback}
                     />
                 </Table>
@@ -31,8 +31,8 @@ class ShareTable extends Component {
         );
     }
 
-    onRefreshCallback;
-    setOnRefreshCallback = onRefreshCallback => {
+    onRefreshCallback: () => void;
+    setOnRefreshCallback = (onRefreshCallback: () => void) => {
         console.debug("ShareTable.setOnRefreshCallback()");
         this.onRefreshCallback = onRefreshCallback;
     };

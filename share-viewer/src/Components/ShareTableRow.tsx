@@ -1,15 +1,29 @@
-import React, { Component } from "react";
-import { dyn, executeAsyncQuery } from "../Utilities/XrmUtilities";
+import * as React from "react";
+import WebApi from "../Utilities/WebApi";
 import { Button, ButtonGroup } from "react-bootstrap";
+import { PrincipalObjectAccess, SystemUser, Team } from "../Utilities/Entities";
 
-class ShareTableRow extends Component {
-    constructor(props) {
-        console.debug("ShareTableRow.constructor()");
+interface ShareTableRowState {
+    record: PrincipalObjectAccess;
+    principalTypeCode: string;
+    principalId: string;
+    principalName: string;
+    accessRightsMask: string;
+}
+
+interface ShareTableRowProps {
+    record: PrincipalObjectAccess;
+}
+
+class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowState> {
+    constructor(props: Readonly<ShareTableRowProps>) {
         super(props);
+        console.debug("ShareTableRow.constructor()");
         this.state = {
             record: props.record,
             principalTypeCode: props.record.principaltypecode,
             principalId: props.record.principalid,
+            principalName: null,
             accessRightsMask: this.convertAccessRightsMask(props.record.accessrightsmask)
         };
     }
@@ -28,9 +42,6 @@ class ShareTableRow extends Component {
                 <td>{this.state.accessRightsMask}</td>
                 <td>
                     <ButtonGroup>
-                        <Button variant="warning" onClick={this.onClickChange}>
-                            Change
-                        </Button>
                         <Button variant="danger" onClick={this.onClickRevoke}>
                             Revoke
                         </Button>
@@ -40,7 +51,7 @@ class ShareTableRow extends Component {
         );
     }
 
-    convertAccessRightsMask(accessRightsMask) {
+    convertAccessRightsMask(accessRightsMask: number) {
         let access = null;
         switch (accessRightsMask) {
             case 4:
@@ -78,56 +89,50 @@ class ShareTableRow extends Component {
         return access != null ? access + " (" + accessRightsMask + ")" : null;
     }
 
-    getPrincipalName = (principalTypeCode, principalId) => {
+    getPrincipalName = () => {
         console.debug("ShareTableRow.getPrincipalName()");
-
-        if (!dyn) {
-            return this.setState({ principalName: "<NO NAME FOUND>" });
-        }
-
-        let query = principalTypeCode + "s(" + principalId + ")";
-        executeAsyncQuery(
-            query,
-            resultJSON => {
-                this.setPrincipalName(resultJSON, principalTypeCode, principalId);
-            },
-            error => {
-                this.getPrincipalName_Error(error, principalId);
-            }
-        );
+        WebApi.getSingle<SystemUser | Team>(this.state.principalTypeCode, this.state.principalId)
+            .then(this.setPrincipalName)
+            .catch(error => {
+                console.error("Faild to retrieve principal object with id " + this.state.principalId);
+                console.error(error);
+            });
     };
 
-    setPrincipalName = (resultJSON, principalTypeCode, principalId) => {
-        let name;
-        if (!resultJSON) {
-            console.error("Faild to retrieve principal object with id " + principalId);
+    setPrincipalName = (entity: SystemUser | Team) => {
+        let name: string;
+        if (!entity) {
+            console.error("Faild to retrieve principal object with id " + this.state.principalId);
             name = "<NO NAME FOUND>";
         } else {
-            name = principalTypeCode === "systemuser" ? resultJSON.fullname : resultJSON.name;
+            switch (this.state.principalTypeCode) {
+                case "systemuser": {
+                    name = (entity as SystemUser).fullname;
+                    break;
+                }
+                case "team": {
+                    name = (entity as Team).name;
+                    break;
+                }
+                default:
+                    name = "<UNKNOWN ENTITY TYPE>";
+            }
         }
         this.setState({
             principalName: name
         });
     };
 
-    getPrincipalName_Error(error, principalId) {
-        console.error("Faild to retrieve principal object with id " + principalId);
-        console.error(error);
-    }
-
-    onClickChange() {
-        console.debug("ShareTableRow.onClickChange");
-        alert("//TODO Change");
-    }
-
     onClickRevoke() {
         console.debug("ShareTableRow.onClickRevoke");
-        if (window.confirm("Are you sure you wish to revoke access to this record")) {
+        if (window.confirm(`Are you sure you wish to revoke ${this.state.principalName}'s access to this record`)) {
             this.revoke();
         }
     }
 
-    revoke() {}
+    revoke() {
+        alert("TODO");
+    }
 }
 
 export default ShareTableRow;

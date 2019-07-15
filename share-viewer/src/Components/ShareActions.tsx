@@ -1,15 +1,18 @@
-import React, { Component } from "react";
+import * as React from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 
-class ShareActions extends Component {
+interface ShareActionsState {}
+
+interface ShareActionsProps {
+    onRefresh: () => void;
+}
+
+class ShareActions extends React.Component<ShareActionsProps, ShareActionsState> {
     state = {};
     render() {
         return (
             <div>
                 <ButtonGroup size="sm">
-                    <Button variant="success" onClick={this.onClickShareThisRecord}>
-                        Share This Record
-                    </Button>
                     <Button variant="primary" onClick={this.onClickRefresh}>
                         Refresh
                     </Button>
@@ -17,11 +20,6 @@ class ShareActions extends Component {
             </div>
         );
     }
-
-    onClickShareThisRecord = () => {
-        console.debug("ShareActions.onClickShareThisRecord()");
-        alert("//TODO Share This Record");
-    };
 
     onClickRefresh = () => {
         console.debug("ShareActions.onClickRefresh()");

@@ -1,8 +1,7 @@
-import React, { Component } from "react";
-import "./App.css";
-import ShareTable from "./Components/ShareTable";
+import * as React from "react";
+import ShareTable from "./ShareTable";
 
-class App extends Component {
+class ShareViewer extends React.Component {
     render() {
         return (
             <div className="App">
@@ -14,4 +13,4 @@ class App extends Component {
     }
 }
 
-export default App;
+export default ShareViewer;
