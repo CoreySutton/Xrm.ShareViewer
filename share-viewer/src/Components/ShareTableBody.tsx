@@ -19,8 +19,8 @@ class ShareTableBody extends React.Component<ShareTableBodyProps, ShareTableBody
     };
     componentDidMount() {
         console.debug("ShareTableBody.componentDidMount()");
-        this.props.onRefresh(this.onRefresh);
-        this.getPoaRecords();
+        this.props.onRefresh(this.populateTable);
+        this.populateTable();
     }
 
     render() {
@@ -29,24 +29,30 @@ class ShareTableBody extends React.Component<ShareTableBodyProps, ShareTableBody
         return (
             <tbody>
                 {this.state.poaRecords.map(poaRecord => (
-                    <ShareTableRow key={poaRecord.principalobjectaccessid} record={poaRecord} />
+                    <ShareTableRow
+                        key={poaRecord.principalobjectaccessid}
+                        record={poaRecord}
+                        refresh={this.populateTable}
+                    />
                 ))}
             </tbody>
         );
     }
 
-    getPoaRecords = () => {
-        console.debug("ShareTableBody.getPoaRecords()");
-        WebApi.getMultiple<PrincipalObjectAccess>(
-            "principalobjectaccessset",
-            `objectid eq '${this.trimId(this.props.recordId)}'`
-        )
+    populateTable = () => {
+        this.getPoaRecords()
             .then(this.parsePoaRecords)
-            .catch(error => {
-                console.debug("ShareTableBody.getPoaRecords_error()");
-                console.error("Faild to retrieve POA records for object id " + this.props.recordId);
-                console.error(error);
-            });
+            .catch(error =>
+                WebApi.errorHandler(error, "Faild to retrieve POA records for object id " + this.props.recordId)
+            );
+    };
+
+    getPoaRecords = (): Promise<WebApiResults<PrincipalObjectAccess>> => {
+        console.debug("ShareTableBody.getPoaRecords()");
+        return WebApi.getMultiple<PrincipalObjectAccess>(
+            "principalobjectaccessset",
+            `objectid eq '${this.trimId(this.props.recordId)}' and accessrightsmask ne 0`
+        );
     };
 
     trimId = (id: string) => {
@@ -68,11 +74,6 @@ class ShareTableBody extends React.Component<ShareTableBodyProps, ShareTableBody
         this.setState({
             poaRecords: poaRecords
         });
-    };
-
-    onRefresh = () => {
-        console.debug("ShareTableBody.onRefresh()");
-        this.getPoaRecords();
     };
 }
 

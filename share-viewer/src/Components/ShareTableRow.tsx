@@ -2,7 +2,7 @@ import * as React from "react";
 import WebApi from "../Utilities/WebApi";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { PrincipalObjectAccess, SystemUser, Team } from "../Typings/Entities";
-import { RevokeAccessParameters, WebApiError } from "../Typings/WebApi";
+import { RevokeAccessParameters } from "../Typings/WebApi";
 import Dynamics from "../Utilities/Dynamics";
 
 interface ShareTableRowState {
@@ -15,6 +15,7 @@ interface ShareTableRowState {
 
 interface ShareTableRowProps {
     record: PrincipalObjectAccess;
+    refresh: () => void;
 }
 
 class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowState> {
@@ -91,7 +92,9 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
         console.debug("ShareTableRow.getPrincipalName()");
         WebApi.getSingle<SystemUser | Team>(this.state.principalTypeCode, this.state.principalId)
             .then(this.setPrincipalName)
-            .catch(error => error(error, "Faild to retrieve principal object with id " + this.state.principalId));
+            .catch(error =>
+                WebApi.errorHandler(error, "Faild to retrieve principal object with id " + this.state.principalId)
+            );
     };
 
     setPrincipalName = (entity: SystemUser | Team) => {
@@ -121,21 +124,17 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
     onClickRevoke = () => {
         console.debug("ShareTableRow.onClickRevoke");
         if (window.confirm(`Are you sure you wish to revoke ${this.state.principalName}'s access to this record`)) {
-            this.revoke();
+            const targetEntityName = Dynamics.getCurrentRecordEntityName();
+            WebApi.getPrimaryIdAttributeName(targetEntityName)
+                .then((targetPrimaryIdAttributeName: string) => {
+                    WebApi.getPrimaryIdAttributeName(this.state.principalTypeCode)
+                        .then((principalPrimaryIdAttributeName: string) => {
+                            this.revokeSharedRecord(targetPrimaryIdAttributeName, principalPrimaryIdAttributeName);
+                        })
+                        .catch(WebApi.errorHandler);
+                })
+                .catch(WebApi.errorHandler);
         }
-    };
-
-    revoke = () => {
-        const targetEntityName = Dynamics.getCurrentRecordEntityName();
-        WebApi.getPrimaryIdAttributeName(targetEntityName)
-            .then((targetPrimaryIdAttributeName: string) => {
-                WebApi.getPrimaryIdAttributeName(this.state.principalTypeCode)
-                    .then((principalPrimaryIdAttributeName: string) => {
-                        this.revokeSharedRecord(targetPrimaryIdAttributeName, principalPrimaryIdAttributeName);
-                    })
-                    .catch(this.error);
-            })
-            .catch(this.error);
     };
 
     revokeSharedRecord = (targetPrimaryIdAttrName: string, principalPrimaryIdAttrName: string) => {
@@ -152,17 +151,8 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
             }
         };
         WebApi.callAction("RevokeAccess", data)
-            .then(() => alert("Revoked"))
-            .catch((error: WebApiError) => {
-                console.error(error.message);
-                console.error(error);
-            });
-    };
-
-    error = (error: WebApiError, customMessage?: string) => {
-        if (customMessage) console.error(customMessage);
-        console.error(error.message);
-        console.error(error);
+            .then(this.props.refresh)
+            .catch(WebApi.errorHandler);
     };
 }
 

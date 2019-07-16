@@ -1,4 +1,12 @@
-import { EntityDefinition, WebApiResults, Header, HttpAction, DynamicsAction, CrmBaseEntity } from "../Typings/WebApi";
+import {
+    EntityDefinition,
+    WebApiResults,
+    Header,
+    HttpAction,
+    DynamicsAction,
+    CrmBaseEntity,
+    WebApiError
+} from "../Typings/WebApi";
 
 export default class WebApi {
     private static webAPIPath = "/api/data/v9.0";
@@ -209,4 +217,10 @@ export default class WebApi {
     public static getRequestPath(query: string): string {
         return `${WebApi.getWebAPIPath()}${query.charAt(0) === "/" ? query : `/${query}`}`;
     }
+
+    public static errorHandler = (error: WebApiError, customMessage?: string) => {
+        if (customMessage) console.error(customMessage);
+        console.error(error.message);
+        console.error(error);
+    };
 }
