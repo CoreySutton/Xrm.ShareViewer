@@ -1,13 +1,29 @@
-import { EntityDefinition, WebApiResults, Header, HttpAction } from "../Typings/WebApi";
+import { EntityDefinition, WebApiResults, Header, HttpAction, DynamicsAction, CrmBaseEntity } from "../Typings/WebApi";
 
 export default class WebApi {
     private static webAPIPath = "/api/data/v9.0";
+
+    public static callAction(actionName: DynamicsAction, data: any): Promise<void> {
+        return WebApi.execute("POST", actionName, data);
+    }
 
     public static getEntitySetName(entityLogicalName: string) {
         return new Promise(function(resolve, reject) {
             WebApi.get<EntityDefinition>(`EntityDefinitions(LogicalName='${entityLogicalName}')`)
                 .then((entityDefinition: EntityDefinition) => {
                     resolve(entityDefinition.EntitySetName);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+        });
+    }
+
+    public static getPrimaryIdAttributeName(entityLogicalName: string) {
+        return new Promise(function(resolve, reject) {
+            WebApi.get<EntityDefinition>(`EntityDefinitions(LogicalName='${entityLogicalName}')`)
+                .then((entityDefinition: EntityDefinition) => {
+                    resolve(entityDefinition.PrimaryIdAttribute);
                 })
                 .catch(error => {
                     reject(error);
@@ -169,7 +185,7 @@ export default class WebApi {
         }
     }
 
-    public static getClientUrl(): any {
+    public static getClientUrl(): string {
         let context: any;
         // GetGlobalContext defined by including reference to
         // ClientGlobalContext.js.aspx in the HTML page.

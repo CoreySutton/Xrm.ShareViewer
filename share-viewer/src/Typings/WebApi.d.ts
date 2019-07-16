@@ -1,4 +1,5 @@
 export type HttpAction = "POST" | "PATCH" | "PUT" | "GET" | "DELETE";
+export type DynamicsAction = "GrantAccess" | "RevokeAccess";
 
 declare global {
     export interface Window {
@@ -17,6 +18,27 @@ export interface WebApiResults<Entity> {
     "@odata.context": string;
     value: Entity[];
 }
+
+export interface WebApiError {
+    code: string;
+    innerError: {
+        message: string;
+        stacktrace: string;
+        type: string;
+    };
+    message: string;
+}
 export interface EntityDefinition {
     EntitySetName: string;
+    PrimaryIdAttribute: string;
+}
+
+export interface RevokeAccessParameters {
+    Target: CrmBaseEntity;
+    Revokee: CrmBaseEntity;
+}
+
+export interface CrmBaseEntity {
+    [name: string]: string;
+    "@odata.type": string;
 }

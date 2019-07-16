@@ -2,6 +2,8 @@ import * as React from "react";
 import WebApi from "../Utilities/WebApi";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { PrincipalObjectAccess, SystemUser, Team } from "../Typings/Entities";
+import { RevokeAccessParameters, WebApiError } from "../Typings/WebApi";
+import Dynamics from "../Utilities/Dynamics";
 
 interface ShareTableRowState {
     record: PrincipalObjectAccess;
@@ -16,17 +18,13 @@ interface ShareTableRowProps {
 }
 
 class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowState> {
-    constructor(props: Readonly<ShareTableRowProps>) {
-        super(props);
-        console.debug("ShareTableRow.constructor()");
-        this.state = {
-            record: props.record,
-            principalTypeCode: props.record.principaltypecode,
-            principalId: props.record.principalid,
-            principalName: null,
-            accessRightsMask: this.convertAccessRightsMask(props.record.accessrightsmask)
-        };
-    }
+    state = {
+        record: this.props.record,
+        principalTypeCode: this.props.record.principaltypecode,
+        principalId: this.props.record.principalid,
+        principalName: "",
+        accessRightsMask: this.convertAccessRightsMask(this.props.record.accessrightsmask)
+    };
 
     componentDidMount() {
         console.debug("ShareTableRow.componentDidMount()");
@@ -93,10 +91,7 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
         console.debug("ShareTableRow.getPrincipalName()");
         WebApi.getSingle<SystemUser | Team>(this.state.principalTypeCode, this.state.principalId)
             .then(this.setPrincipalName)
-            .catch(error => {
-                console.error("Faild to retrieve principal object with id " + this.state.principalId);
-                console.error(error);
-            });
+            .catch(error => error(error, "Faild to retrieve principal object with id " + this.state.principalId));
     };
 
     setPrincipalName = (entity: SystemUser | Team) => {
@@ -123,16 +118,52 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
         });
     };
 
-    onClickRevoke() {
+    onClickRevoke = () => {
         console.debug("ShareTableRow.onClickRevoke");
         if (window.confirm(`Are you sure you wish to revoke ${this.state.principalName}'s access to this record`)) {
             this.revoke();
         }
-    }
+    };
 
-    revoke() {
-        alert("TODO");
-    }
+    revoke = () => {
+        const targetEntityName = Dynamics.getCurrentRecordEntityName();
+        WebApi.getPrimaryIdAttributeName(targetEntityName)
+            .then((targetPrimaryIdAttributeName: string) => {
+                WebApi.getPrimaryIdAttributeName(this.state.principalTypeCode)
+                    .then((principalPrimaryIdAttributeName: string) => {
+                        this.revokeSharedRecord(targetPrimaryIdAttributeName, principalPrimaryIdAttributeName);
+                    })
+                    .catch(this.error);
+            })
+            .catch(this.error);
+    };
+
+    revokeSharedRecord = (targetPrimaryIdAttrName: string, principalPrimaryIdAttrName: string) => {
+        const targetEntityName = Dynamics.getCurrentRecordEntityName();
+        const targetId = Dynamics.getCurrentRecordId();
+        const data: RevokeAccessParameters = {
+            Target: {
+                [targetPrimaryIdAttrName]: targetId,
+                "@odata.type": `Microsoft.Dynamics.CRM.${targetEntityName}`
+            },
+            Revokee: {
+                [principalPrimaryIdAttrName]: this.state.principalId,
+                "@odata.type": `Microsoft.Dynamics.CRM.${this.state.principalTypeCode}`
+            }
+        };
+        WebApi.callAction("RevokeAccess", data)
+            .then(() => alert("Revoked"))
+            .catch((error: WebApiError) => {
+                console.error(error.message);
+                console.error(error);
+            });
+    };
+
+    error = (error: WebApiError, customMessage?: string) => {
+        if (customMessage) console.error(customMessage);
+        console.error(error.message);
+        console.error(error);
+    };
 }
 
 export default ShareTableRow;
