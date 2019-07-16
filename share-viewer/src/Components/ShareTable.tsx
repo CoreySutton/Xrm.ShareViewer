@@ -2,6 +2,7 @@ import * as React from "react";
 import ShareTableBody from "./ShareTableBody";
 import { Table } from "react-bootstrap";
 import ShareActions from "./ShareActions";
+import Dynamics from "../Utilities/Dynamics";
 
 class ShareTable extends React.Component {
     state = {
@@ -22,10 +23,7 @@ class ShareTable extends React.Component {
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <ShareTableBody
-                        recordId={parent.Xrm.Page.data.entity.getId()}
-                        onRefresh={this.setOnRefreshCallback}
-                    />
+                    <ShareTableBody recordId={Dynamics.getCurrentRecordId()} onRefresh={this.setOnRefreshCallback} />
                 </Table>
             </div>
         );
