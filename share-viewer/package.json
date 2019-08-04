@@ -29,9 +29,10 @@
         "react-dom": "^16.8.6"
     },
     "scripts": {
-        "build-dev-watch": "webpack --progress --colors --display-error-details --watch --mode development",
+        "watch-dev": "webpack --progress --colors --display-error-details --watch --mode development",
         "build-dev": "webpack --progress --colors --display-error-details --mode development",
         "build": "webpack --progress --colors --display-error-details --mode production",
+        "watch": "webpack --progress --colors --display-error-details --watch --mode production",
         "start": "webpack-dev-server --mode development"
     }
 }

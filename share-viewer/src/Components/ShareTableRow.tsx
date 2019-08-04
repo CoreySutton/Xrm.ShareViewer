@@ -4,6 +4,7 @@ import { Button, ButtonGroup } from "react-bootstrap";
 import { PrincipalObjectAccess, SystemUser, Team } from "../Typings/Entities";
 import { RevokeAccessParameters } from "../Typings/WebApi";
 import Dynamics from "../Utilities/Dynamics";
+import AccessRightsMaskDecoder from "../Utilities/AccessRightsMaskDecoder";
 
 interface ShareTableRowState {
     record: PrincipalObjectAccess;
@@ -24,7 +25,7 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
         principalTypeCode: this.props.record.principaltypecode,
         principalId: this.props.record.principalid,
         principalName: "",
-        accessRightsMask: this.convertAccessRightsMask(this.props.record.accessrightsmask)
+        accessRightsMask: AccessRightsMaskDecoder.decode(this.props.record.accessrightsmask)
     };
 
     componentDidMount() {
@@ -48,44 +49,6 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
                 </td>
             </tr>
         );
-    }
-
-    convertAccessRightsMask(accessRightsMask: number) {
-        let access = null;
-        switch (accessRightsMask) {
-            case 4:
-                access = "Append";
-                break;
-            case 16:
-                access = "Append To";
-                break;
-            case 524288:
-                access = "Assign";
-                break;
-            case 32:
-                access = "Create";
-                break;
-            case 65536:
-                access = "Delete";
-                break;
-            case 0:
-                access = "None";
-                break;
-            case 1:
-                access = "Read";
-                break;
-            case 262144:
-                access = "Share";
-                break;
-            case 2:
-                access = "Write";
-                break;
-            default:
-                access = "UNKNOWN";
-                break;
-        }
-
-        return access != null ? access + " (" + accessRightsMask + ")" : null;
     }
 
     getPrincipalName = () => {
