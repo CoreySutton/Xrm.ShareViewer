@@ -6,17 +6,17 @@ import { RevokeAccessParameters } from "../Typings/WebApi";
 import Dynamics from "../Utilities/Dynamics";
 import AccessRightsMaskDecoder from "../Utilities/AccessRightsMaskDecoder";
 
+interface ShareTableRowProps {
+    record: PrincipalObjectAccess;
+    refresh: () => void;
+}
+
 interface ShareTableRowState {
     record: PrincipalObjectAccess;
     principalTypeCode: string;
     principalId: string;
     principalName: string;
-    accessRightsMask: string;
-}
-
-interface ShareTableRowProps {
-    record: PrincipalObjectAccess;
-    refresh: () => void;
+    accessRightsMask: number;
 }
 
 class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowState> {
@@ -25,7 +25,7 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
         principalTypeCode: this.props.record.principaltypecode,
         principalId: this.props.record.principalid,
         principalName: "",
-        accessRightsMask: AccessRightsMaskDecoder.decode(this.props.record.accessrightsmask)
+        accessRightsMask: this.props.record.accessrightsmask
     };
 
     componentDidMount() {
@@ -35,11 +35,12 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
 
     render() {
         console.debug("ShareTableRow.render()");
+        let accessRightsMaskString = AccessRightsMaskDecoder.decode(this.props.record.accessrightsmask);
         return (
             <tr>
                 <td>{this.state.principalTypeCode}</td>
                 <td>{this.state.principalName}</td>
-                <td>{this.state.accessRightsMask}</td>
+                <td>{accessRightsMaskString}</td>
                 <td>
                     <ButtonGroup>
                         <Button variant="danger" onClick={this.onClickRevoke}>
