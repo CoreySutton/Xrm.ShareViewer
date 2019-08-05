@@ -6,5 +6,12 @@ import ReactDOM from "react-dom";
 import ShareViewer from "./Components/ShareViewer";
 
 window.addEventListener("load", function onLoad() {
-    ReactDOM.render(<ShareViewer />, document.getElementById("root"));
+    ReactDOM.render(
+        <div className="App">
+            <header className="App-header">
+                <ShareViewer />
+            </header>
+        </div>,
+        document.getElementById("root")
+    );
 });

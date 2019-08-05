@@ -43,7 +43,7 @@ class ShareTableRow extends React.Component<ShareTableRowProps, ShareTableRowSta
                 <td>{accessRightsMaskString}</td>
                 <td>
                     <ButtonGroup>
-                        <Button variant="danger" onClick={this.onClickRevoke}>
+                        <Button variant="danger" size="sm" onClick={this.onClickRevoke}>
                             Revoke
                         </Button>
                     </ButtonGroup>
